@@ -21,6 +21,11 @@ Vagrant.configure("2") do |config|
     config.vm.box = "generic/debian12"
   end
 
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "../provisioning/playbook.yml"
+    ansible.inventory_path = "../provisioning/inventory.ini"
+  end
+
   #config.vm.provider "virtualbox" do |vb|
   #  vb.gui = false
   #  vb.memory = "2048"
