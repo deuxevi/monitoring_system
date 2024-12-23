@@ -1,0 +1,10 @@
+# roles/alertmanager/defaults/main.yml
+
+alertmanager_version: "0.25.0"
+alertmanager_url: "https://github.com/prometheus/alertmanager/releases/download/v0.25.0/alertmanager-0.25.0.linux-amd64.tar.gz"
+alertmanager_install_dir: "/usr/local/bin"
+alertmanager_config_dir: "/etc/alertmanager"
+alertmanager_config_file: "{{ alertmanager_config_dir }}/alertmanager.yml"
+alertmanager_user: "alertmanager"
+alertmanager_group: "alertmanager"
+alertmanager_service_name: "alertmanager"

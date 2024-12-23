@@ -1,0 +1,62 @@
+---
+- name: Ensure curl is installed
+  apt:
+    name: curl
+    state: present
+- name: Download Loki binary
+  get_url:
+    url: "https://github.com/grafana/loki/releases/download/v3.2.0/loki-linux-amd64.zip"
+    dest: "/usr/local/bin/loki-linux-amd64.zip"
+    mode: '0644'
+- name: Ensure unzip is installed
+  apt:
+    name: unzip
+    state: present
+- name: Unzip the Loki binary
+  unarchive:
+    src: "/usr/local/bin/loki-linux-amd64.zip"
+    dest: "/usr/local/bin"
+    remote_src: yes
+    mode: '0755'
+- name: Add execute permission to the Loki binary
+  file:
+    path: "/usr/local/bin/loki-linux-amd64"
+    mode: '0755'
+- name: Download Loki configuration file
+  get_url:
+    url: "https://raw.githubusercontent.com/grafana/loki/v3.2.0/cmd/loki/loki-local-config.yaml"
+    dest: "/usr/local/bin/loki-local-config.yaml"
+    mode: '0644'
+- name: Create Loki user
+  user:
+    name: loki
+    system: yes
+- name: Create systemd service file for Loki
+  copy:
+    dest: /etc/systemd/system/loki.service
+    content: |
+      [Unit]
+      Description=Loki service
+      After=network.target
+      [Service]
+      Type=simple
+      User=loki
+      ExecStart=/usr/local/bin/loki-linux-amd64 -config.file /usr/local/bin/loki-local-config.yaml
+      [Install]
+      WantedBy=multi-user.target
+    mode: '0644'
+- name: Reload systemd daemon to pick up the new Loki service
+  systemd:
+    daemon_reload: yes
+- name: Enable and start Loki service
+  systemd:
+    name: loki
+    enabled: yes
+    state: started
+- name: Check Loki service status
+  command: systemctl status loki
+  register: loki_status
+  failed_when: false
+- name: Print Loki service status
+  debug:
+    msg: "{{ loki_status.stdout }}"

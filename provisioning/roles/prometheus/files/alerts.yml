@@ -1,0 +1,94 @@
+groups:
+  - name: test
+    rules:
+    - alert: Trop_2_load
+      expr: node_load1 >= 0.6
+      for: 10s
+      labels:
+        severity: critical
+      annotations:
+        summary: "{{$labels.instance}} - Charge trop élevée"
+        description: "Le serveur subit une charge importante, ce qui peut affecter ses performances."
+
+  - name: AllInstances
+    rules:
+    - alert: InstanceDown
+      expr: up == 0
+      for: 1m
+      annotations:
+        title: 'Instance {{ $labels.instance }} hors service'
+        description: "L'instance {{ $labels.instance }} du job {{ $labels.job }} est hors service depuis plus d'une minute."
+
+    - alert: HostHighCpuLoad
+      expr: (sum by (instance) (avg by (mode, instance) (rate(node_cpu_seconds_total{mode!="idle"}[2m]))) > 0.8) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Charge CPU élevée sur l'hôte (instance {{ $labels.instance }})"
+        description: "La charge CPU est supérieure à 80%\n  VALEUR = {{ $value }}\n  ÉTIQUETTES = {{ $labels }}"
+
+    - alert: HostOutOfMemory
+      expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 10) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Mémoire insuffisante sur l'hôte (instance {{ $labels.instance }})"
+        description: "La mémoire disponible est inférieure à 10%\n  VALEUR = {{ $value }}\n  ÉTIQUETTES = {{ $labels }}"
+
+    - alert: HostMemoryIsUnderutilized
+      expr: (100 - (avg_over_time(node_memory_MemAvailable_bytes[30m]) / node_memory_MemTotal_bytes * 100) < 20) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+      for: 1w
+      labels:
+        severity: info
+      annotations:
+        summary: "Mémoire de l'hôte sous-utilisée (instance {{ $labels.instance }})"
+        description: "La mémoire de l'hôte est sous-utilisée (< 20%) pendant une semaine. Envisagez de réduire l'espace mémoire.\n  VALEUR = {{ $value }}\n  ÉTIQUETTES = {{ $labels }}"
+
+    - alert: HostOutOfDiskSpace
+      expr: ((node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes < 10 and ON (instance, device, mountpoint) node_filesystem_readonly == 0) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Espace disque insuffisant sur l'hôte (instance {{ $labels.instance }})"
+        description: "Le disque est presque plein (< 10% d'espace disponible)\n  VALEUR = {{ $value }}\n  ÉTIQUETTES = {{ $labels }}"
+
+    - alert: HostDiskWillFillIn24Hours
+      expr: ((node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes < 10 and ON (instance, device, mountpoint) predict_linear(node_filesystem_avail_bytes{fstype!~"tmpfs"}[1h], 24 * 3600) < 0 and ON (instance, device, mountpoint) node_filesystem_readonly == 0) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Le disque de l'hôte sera plein dans 24 heures (instance {{ $labels.instance }})"
+        description: "Le système de fichiers est sur le point d'être plein dans les prochaines 24 heures à la vitesse actuelle d'écriture.\n  VALEUR = {{ $value }}\n  ÉTIQUETTES = {{ $labels }}"
+
+    - alert: HostCpuIsUnderutilized
+      expr: (100 - (rate(node_cpu_seconds_total{mode="idle"}[30m]) * 100) < 20) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+      for: 1w
+      labels:
+        severity: info
+      annotations:
+        summary: "CPU de l'hôte sous-utilisé (instance {{ $labels.instance }})"
+        description: "Le CPU est sous-utilisé (< 20%) pendant une semaine. Envisagez de réduire le nombre de CPU.\n  VALEUR = {{ $value }}\n  ÉTIQUETTES = {{ $labels }}"
+
+    - alert: HostSystemdServiceCrashed
+      expr: (node_systemd_unit_state{state="failed"} == 1) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+      for: 0m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Le service systemd de l'hôte a planté (instance {{ $labels.instance }})"
+        description: "Un service systemd a planté.\n  VALEUR = {{ $value }}\n  ÉTIQUETTES = {{ $labels }}"
+
+    - alert: ServiceBreakdown
+      expr: probe_success < 1
+      for: 2m
+      labels:
+        severity: critical
+        application: part_of
+      annotations:
+        summary: "Dysfonctionnement sur un service (instance {{ $labels.instance }})"
+        description: "Un service ne répond plus ou renvoie des erreurs.\n  VALEUR = {{ $value }}\n  ÉTIQUETTES = {{ $labels }}"
+

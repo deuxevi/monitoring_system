@@ -1,0 +1,22 @@
+---
+# Tâches pour installer et configurer Promtail
+
+- name: Installer Promtail
+  apt:
+    name: promtail
+    state: present
+  become: yes
+
+- name: Copier le fichier de configuration de Promtail
+  copy:
+    src: ../files/config.yml
+    dest: /etc/promtail/config.yml
+    mode: '0644'
+  become: yes
+
+- name: Démarrer et activer Promtail
+  service:
+    name: promtail
+    state: started
+    enabled: yes
+  become: yes

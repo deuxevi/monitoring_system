@@ -1,0 +1,32 @@
+global:
+  resolve_timeout: 2m
+  smtp_require_tls: false
+
+route:
+  group_by: ['altername']
+  # Send all notifications to me.
+  group_wait: 30s
+  group_interval: 1m
+  repeat_interval: 5s
+  receiver: 'email-me'
+
+receivers:
+#- name: 'email-me'
+#  email_configs:
+#  - to: "youphoque23@gmail.com"
+#    from: "youphoque23@gmail.com"
+#    smarthost: "smtp.gmail.com:587"
+#   auth_username: "youphoque23@gmail.com"
+#    auth_identity: "youphoque23@gmail.com"
+#    auth_password: "jwla zajq bonl teva"
+
+- name: 'email-me'
+  webhook_configs:
+    - send_resolved: true
+      url: 'http://192.168.56.1:3000/hooks/66fcf59390775a69525fa6f1/AAhkRHhZ3CgGnyY86Cq6BQHvXXDZkZbofYwgE79wWj8zTS5r'
+
+#  telegram_configs:
+#  - bot_token: 6270360939:AAGumOg0D5nhvDWdKYk-n2V6WxcYVOxS__w
+#    api_url: https://api.telegram.org
+#    chat_id: 1387447452
+#    parse_mode: ''

@@ -1,0 +1,33 @@
+---
+# Tâches pour installer Snap et Rocket.Chat via Snap
+
+- name: Installer Snap (si non installé)
+  apt:
+    name: snapd
+    state: present
+  become: yes
+
+- name: S'assurer que le service Snap est démarré
+  service:
+    name: snapd
+    state: started
+    enabled: yes
+  become: yes
+
+- name: Installer Rocket.Chat via Snap
+  snap:
+    name: rocketchat-server
+    state: present
+    classic: yes
+  become: yes
+
+- name: Changer le port d'écoute de Rocket.Chat
+  command: snap set rocketchat-server server.port=3001
+  become: yes
+
+- name: Vérifier que Rocket.Chat est en cours d'exécution
+  service:
+    name: snap.rocketchat-server.rocketchat-server
+    state: started
+    enabled: yes
+  become: yes

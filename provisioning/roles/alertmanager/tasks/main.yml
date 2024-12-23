@@ -1,0 +1,36 @@
+---
+# Tâches d'installation et de configuration de Alertmanager
+
+- name: Installer Alertmanager via apt
+  apt:
+    name: prometheus-alertmanager
+    state: present
+  become: yes
+
+#- name: Create alertmanager config directory
+#  file:
+#    path: "{{ alertmanager_config_dir }}"
+#    state: directory
+#    owner: "{{ alertmanager_user }}"
+#    group: "{{ alertmanager_group }}"
+#    mode: '0755'
+#  become: yes
+
+- name: Deploy the alertmanager configuration file
+  template:
+    src: ../files/alertmanager.yml
+    dest: /etc/prometheus/alertmanager.yml
+  become: yes
+
+- name: Restart prometheus
+  ansible.builtin.systemd:
+    name: prometheus-alertmanager
+    state: restarted
+    enabled: yes
+
+- name: Démarrer et activer Prometheus
+  ansible.builtin.service:
+    name: prometheus-alertmanager
+    state: started
+    enabled: yes
+  become: yes

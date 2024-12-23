@@ -1,0 +1,26 @@
+---
+- name: Ajout du depot Grafana et installation de Promtail
+  hosts: all
+  become: yes
+  roles:
+    - addgrafanarepo
+    - promtail
+
+- name: Déploiement du système de monitoring
+  hosts: monitoring
+  become: yes
+  roles:
+    - grafana
+    - loki
+    - prometheus
+    - alertmanager
+    - rocketchat
+    
+
+- name: Configurer les cibles
+  hosts: targets
+  become: yes
+  tasks:
+    - name: Installer node_exporter (Prometheus)
+      apt:
+        name: prometheus-node-exporter

@@ -1,0 +1,49 @@
+---
+# Tâches d'installation et de configuration de Prometheus
+
+- name: Installer Prometheus via apt
+  apt:
+    name: prometheus
+    state: present
+  become: yes
+
+- name: Créer le répertoire des règles Prometheus
+  file:
+    path: /etc/prometheus/rules
+    state: directory
+    mode: '0755'
+  become: yes
+
+- name: Copier le fichier de configuration Prometheus
+  copy:
+    src: ../files/prometheus.yml
+    dest: /etc/prometheus/prometheus.yml
+  #  mode: '0644'  # Définir explicitement les permissions
+  become: yes
+
+- name: Copier les règles d'alertes Prometheus
+  copy:
+    src: ../files/alerts.yml
+    dest: /etc/prometheus/rules/alerts.yml
+    mode: '0644'  # Définir explicitement les permissions
+  become: yes
+
+- name: Copier la configuration Nginx pour Prometheus
+  copy:
+    src: ../files/nginx.yml
+    dest: /etc/prometheus/rules/nginx.yml
+    mode: '0644'  # Définir explicitement les permissions
+  become: yes
+
+- name: Restart prometheus
+  ansible.builtin.systemd:
+    name: prometheus
+    state: restarted
+    enabled: yes
+
+- name: Démarrer et activer Prometheus
+  ansible.builtin.service:
+    name: prometheus
+    state: started
+    enabled: yes
+  become: yes
