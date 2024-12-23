@@ -1,16 +1,4 @@
 ---
-#- name: Add Grafana GPG key to keyring
-#  shell: "{{ grafana_gpg_key }}"
-#  ignore_errors: true
-#  changed_when: false
-#
-#- name: Add Grafana repository to sources.list
-#  shell: "{{ grafana_repo }}"
-#
-#- name: Update APT cache
-#  apt:
-#    update_cache: yes
-
 - name: Install Grafana
   apt:
     name: grafana
