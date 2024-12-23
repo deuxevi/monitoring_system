@@ -1,5 +1,3 @@
-Voici le fichier README en français pour décrire le contenu du fichier `Vagrantfile` :
-
 ---
 
 # Configuration Vagrant pour l'Infrastructure de Monitoring
