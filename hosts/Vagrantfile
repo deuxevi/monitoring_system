@@ -25,17 +25,4 @@ Vagrant.configure("2") do |config|
     ansible.playbook = "../provisioning/playbook.yml"
     ansible.inventory_path = "../provisioning/inventory.ini"
   end
-
-  #config.vm.provider "virtualbox" do |vb|
-  #  vb.gui = false
-  #  vb.memory = "2048"
-  #  vb.cpus = 2
-  #end
-
-#config.vm.network "forwarded_port", guest: 80, host: 8080, auto_correct:true
-#config.vm.usable_port_range = (8000..9000)
 end
-  
-
-
-
